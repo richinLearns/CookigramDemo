@@ -34,6 +34,9 @@ public class SecurityConfig {
                 .permitAll()
             )
             .authorizeHttpRequests(auth -> auth
+                //  The specific role-based dashboard rule MUST be first.
+                .requestMatchers("/dashboard").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF", "ROLE_CUSTOMER")
+                
                 .requestMatchers(
                     "/api/v1/auth/**", 
                     "/h2-console/**",
@@ -44,8 +47,7 @@ public class SecurityConfig {
                     "/order", "/add-to-cart", "/cart", "/cart/**", "/checkout", "/charge", "/result",
                     "/api/shipping/calculate"
                 ).permitAll()
-                //  NEW LINE: Explicitly authorize /dashboard for all roles 
-                .requestMatchers("/dashboard").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF", "ROLE_CUSTOMER")
+
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/cart").permitAll()
                 .anyRequest().authenticated()
             )
