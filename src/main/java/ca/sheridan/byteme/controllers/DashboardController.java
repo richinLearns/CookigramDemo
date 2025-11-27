@@ -2,6 +2,7 @@ package ca.sheridan.byteme.controllers;
 
 import ca.sheridan.byteme.beans.Role;
 import ca.sheridan.byteme.beans.User;
+import ca.sheridan.byteme.repositories.UserRepository;
 import ca.sheridan.byteme.services.CartService;
 import ca.sheridan.byteme.services.OrderService;
 import ca.sheridan.byteme.services.PromotionService;
@@ -16,6 +17,7 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Controller
@@ -24,9 +26,21 @@ public class DashboardController {
     private final PromotionService promotionService;
     private final OrderService orderService;
     private final CartService cartService;
+    private final UserRepository userRepository;
 
     @GetMapping("/dashboard")
     public String getDashboard(Model model, Principal principal) {
+        Optional<User> userOptional = Optional.empty();
+        if (principal != null) {
+            String username = principal.getName();
+            userOptional = userRepository.findByEmail(username);
+            
+            // Add username for display (optional)
+            model.addAttribute("username", username);
+        } else {
+            // Should not happen if security is working, but safe fallback
+            model.addAttribute("username", "Guest");
+        }
 
         // --- Add Cart Count ---
         model.addAttribute("cartCount", cartService.getCartCount());
@@ -51,9 +65,7 @@ public class DashboardController {
         String formattedTime = zonedTime.format(formatter);
         model.addAttribute("currentTime", formattedTime);
 
-        String username = (principal != null) ? principal.getName() : "Guest";
-        model.addAttribute("username", username);
-
+    
         return "dashboard";
     }
 }
