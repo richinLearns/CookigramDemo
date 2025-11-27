@@ -45,7 +45,7 @@ public class SecurityConfig {
                     "/api/shipping/calculate"
                 ).permitAll()
                 //  NEW LINE: Explicitly authorize /dashboard for all roles 
-                .requestMatchers("/dashboard").hasAnyAuthority("ADMIN", "STAFF", "CUSTOMER")
+                .requestMatchers("/dashboard").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF", "ROLE_CUSTOMER")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/cart").permitAll()
                 .anyRequest().authenticated()
             )
