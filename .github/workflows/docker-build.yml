@@ -8,6 +8,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # ------------------------------------------------------------------
+    # NEW: This creates a MongoDB container inside the GitHub Runner
+    # ------------------------------------------------------------------
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017 # Maps the container port to the runner's localhost:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,9 +30,11 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '25'
-          distribution: 'microsoft'
+          distribution: 'microsoft' # Microsoft builds are good for early access versions
 
       - name: Build with Maven
+        # This command runs tests. Because of the 'services' block above, 
+        # localhost:27017 is now available, and tests will pass.
         run: mvn -B clean package
 
       - name: Log in to Docker Hub
@@ -28,6 +44,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
+        # Note: Your Dockerfile also runs 'mvn package', which is a bit redundant 
+        # but safe because it uses -DskipTests.
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cookigramdemo-backend:v6 .
 
       - name: Push Docker image
