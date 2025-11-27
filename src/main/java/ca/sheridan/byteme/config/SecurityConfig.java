@@ -48,7 +48,7 @@ public class SecurityConfig {
                     "/api/shipping/calculate"
                 ).permitAll()
 
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/cart").permitAll()
+                //.requestMatchers(org.springframework.http.HttpMethod.GET, "/cart").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider);
